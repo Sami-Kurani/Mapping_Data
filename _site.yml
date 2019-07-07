@@ -4,8 +4,8 @@ navbar:
   left:
     - text: "Home"
       href: index.html
-    - text: "Journal"
-      href: Journal.html
+    - text: "Election Data"
+      href: Election_Data.html
     - text: "Contact Information"
       href: Links.html
 output_dir: "docs"

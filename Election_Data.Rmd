@@ -1,0 +1,118 @@
+---
+title: "Election Mapping"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    collapsed: false
+    number_sections: false
+    toc_depth: 1
+    #code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message=FALSE,warning=FALSE, cache=TRUE)
+```
+# Visualizing Voter Data
+
+# Looking at the starting boundaries + loading libraries
+
+This is my first time playing around with RMarkdown, so first, I'm going to load in the data I'm working with. 
+
+```{r results='hide', message=FALSE, warning=FALSE}
+
+#loading in the libraries we need
+
+library(leaflet)
+library(sp)
+library(rgdal)
+library(maptools)
+library(sf)
+
+#Loading the ON Federal Election Districts 
+
+E_D <- readOGR("D:\\Blog_Personal_Work\\Federal_Election_Data\\ON_Electoral_Divisions.shp")
+Poll_Boundaries <- readOGR("D:\\Blog_Personal_Work\\Hamilton_Election_Data\\Election_Poll_Boundaries\\Election_Poll_Boundaries.shp")
+
+#Changing the projection of the District layer
+
+E_Dist <- st_read("D:\\Blog_Personal_Work\\Federal_Election_Data\\ON_Electoral_Divisions.shp") %>% 
+  st_transform(crs="+init=epsg:4326")
+
+#Just plotting the values normally
+
+plot(E_D)
+
+```
+
+#Loading in data
+
+Now that we have an idea of what the boundaries look like, lets load in a shapefile I merged in QGIS, indicating the 2015 federal election results for Ontario.
+
+```{r}
+
+#Selecting the appropriate colours for each political party 
+
+
+pal <- colorFactor(
+  palette = c('blue', 'red', 'orange'),
+  domain = E_Dist$Federal__2
+)
+
+#Creating the map itself 
+EDM <- leaflet(E_Dist) %>% 
+  addProviderTiles(providers$OpenStreetMap) %>%
+  setView(-80,49,4) %>%
+  addPolygons(data=E_Dist,
+              weight = 2,
+              opacity = 1,
+              color = ~pal(Federal__2),
+              dashArray = "3",
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 5,
+                color = "#666",
+                dashArray = "",
+                fillOpacity = 0.7,
+                bringToFront = TRUE),
+                label = ~Federal_12)
+                
+
+#And done! Lets take a look. 
+
+EDM
+```
+
+
+# Looking specifically at the Greater Toronto Area
+
+Awesome, once we've seen the entirety of the province, let's specifically look at the Greater Toronto Area
+
+```{R }
+EDM_GTA <- leaflet(E_Dist) %>% 
+  addProviderTiles(providers$OpenStreetMap) %>%
+  setView(-79.5,43.6,9) %>%
+  addPolygons(data=E_Dist,
+              weight = 2,
+              opacity = 1,
+              color = ~pal(Federal__2),
+              dashArray = "3",
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 5,
+                color = "#666",
+                dashArray = "",
+                fillOpacity = 0.7,
+                bringToFront = TRUE),
+                label = ~Federal_12)
+                
+
+# Now lets get a closer look of the GTA 
+EDM_GTA
+
+
+```
+
+And done! 
+
+
