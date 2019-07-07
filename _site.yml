@@ -6,6 +6,8 @@ navbar:
       href: index.html
     - text: "Election Data"
       href: Election_Data.html
+    - text: "Business Analysis - GIS"
+      href: Business_Analysis.html
     - text: "Contact Information"
       href: Links.html
 output_dir: "docs"
