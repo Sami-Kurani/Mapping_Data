@@ -1,0 +1,156 @@
+---
+title: "Hamilton Demographics"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    collapsed: false
+    number_sections: false
+    toc_depth: 1
+    #code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message=FALSE,warning=FALSE, cache=TRUE)
+```
+---
+
+# Looking at Income and Population 
+
+Lets look at the City of Hamilton and focus on various demographic parameters. Specifically, population and average income. 
+
+```{r results='hide', message=FALSE, warning=FALSE}
+
+# we'll start by loading in the libraries we need
+
+library(leaflet)
+library(sp)
+library(rgdal)
+library(maptools)
+library(sf)
+
+#Loading the Hamilton Census Tracts (Also known as Dissemination Areas, or "DA's")
+
+Hamilton_Dissemination_Areas <- readOGR("D:\\Blog_Personal_Work\\Hamilton_Market_Data\\Hamilton_Census_Layers.shp")
+
+# And setting it up to be mapped later 
+
+Ham_Reread_Data <- st_read("D:\\Blog_Personal_Work\\Hamilton_Market_Data\\Hamilton_Census_Layers.shp") %>% 
+  st_transform(crs="+init=epsg:4326")
+
+
+
+#Just plotting the map normally, without any specific data being shown
+
+plot(Hamilton_Dissemination_Areas)
+
+```
+
+# Analyzing Demographic Data
+
+Now that we have the shapefile properly uploaded, lets look at some variables. We can start by summarizing the data, and visualizing the distribution of the population and income variables 
+
+```{r}
+summary(Ham_Reread_Data$Pop_Int)
+hist(Ham_Reread_Data$Pop_Int, main="Distribution of Population Data", xlab = "Population Count")
+```
+
+With the histogram, we can see that the vast majority of the DA's are under 1000 people, with almost half of them under 500 individuals.
+
+
+
+Moving onto income: 
+```{r}
+summary(Ham_Reread_Data$Income_Int)
+hist(Ham_Reread_Data$Income_Int, main="Distribution of Average Income Data", xlab = "Average Income ($)")
+
+```
+
+And when we look at income, we can see majority of individuals in Hamilton earn under approximately $75,000. 
+
+# Mapping Demographic Data 
+
+
+Now lets actually create some interactive maps! 
+
+```{r}
+
+
+
+#Creating the colour scale 
+
+Population_pal <- colorQuantile("Blues", NULL, n = 5)
+
+
+
+# Preparing the text for the map:
+mytext=paste("Population: ", Ham_Reread_Data$Pop_Int, sep="")
+
+Hamilton_Pop_Map <- leaflet(Ham_Reread_Data) %>% 
+  addProviderTiles(providers$OpenStreetMap) %>%
+  setView(-79.8,43.25,10) %>%
+  addPolygons(data=Ham_Reread_Data,
+              weight = 2,
+              opacity = 1,
+              color = ~Population_pal(as.integer(Pop_Int)),
+              dashArray = "1",
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 5,
+                color = "#666",
+                dashArray = "",
+                fillOpacity = 0.7,
+                bringToFront = TRUE),
+                label = mytext) %>%
+  addLegend(pal = Population_pal, values = round(Ham_Reread_Data$Pop_Int,0), labFormat = function(type, cuts, p) {
+    n = length(cuts)
+    paste0(cuts[-n], " &ndash; ", cuts[-1])
+  },  opacity=0.9, title = "Population ", position = "bottomleft"  )
+    
+
+Hamilton_Pop_Map
+
+```
+
+And now we can look at the average income per DA as well: 
+
+
+```{R }
+
+Income_pal <- colorQuantile("YlGn", NULL, n = 5)
+
+mytext=paste("Average Income: ", Ham_Reread_Data$Income_Int, sep="")
+
+Hamilton_Inc_Map <- leaflet(Ham_Reread_Data) %>% 
+  addProviderTiles(providers$OpenStreetMap) %>%
+  setView(-79.8,43.25,10) %>%
+  addPolygons(data=Ham_Reread_Data,
+              weight = 2,
+              opacity = 1,
+              color = ~Income_pal(as.integer(Income_Int)),
+              dashArray = "1",
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 5,
+                color = "#666",
+                dashArray = "",
+                fillOpacity = 0.7,
+                bringToFront = TRUE),
+                label = mytext) %>%
+  addLegend(pal = Income_pal, values = round(Ham_Reread_Data$Income_Int,0), labFormat = function(type, cuts, p) {
+    n = length(cuts)
+    paste0(cuts[-n], " &ndash; ", cuts[-1])
+  },  opacity=0.9, title = "Population ", position = "bottomleft"  )
+    
+
+Hamilton_Inc_Map
+
+
+```
+
+And done! 
+
+
+
+
+
