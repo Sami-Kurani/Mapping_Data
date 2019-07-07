@@ -1,11 +1,11 @@
-name: "Mapping Data"
+name: "Visualizing Spatial Data"
 navbar:
-  title: "Mapping Data"
+  title: "Visualizing Spatial Data"
   left:
     - text: "Home"
       href: index.html
     - text: "Journal"
       href: Journal.html
-    - text: "Links"
+    - text: "Contact Information"
       href: Links.html
 output_dir: "docs"
